@@ -17,11 +17,14 @@ class Buku extends Model
         'penerbit',
         'tahun_terbit',
         'stok',
-        // TODO 2: Tambahkan kolom 'cover' pada properti $fillable
+        'cover',
     ];
 
     public function peminjaman()
-    {
-        return $this->hasMany(Peminjaman::class, 'buku_id');
-    }
+{
+    return $this->hasMany(
+        \App\Models\Peminjaman::class,
+        'buku_id'
+    );
+}
 }

@@ -19,11 +19,28 @@ class HomeController extends Controller
         // 4. Lakukan paginasi 8 data dengan withQueryString()
         // 5. Ambil list penerbit unik untuk opsi dropdown filter
         // 6. Return view 'home' dengan data buku dan list penerbit
+        $search = $request->input('search');
+                $filter = $request->input('filter');
+                $sort = $request->input('sort', 'judul');
 
-        $buku = Buku::paginate(8);
-        $listPenerbit = collect();
+        $buku = Buku::query()
+            ->when($search, function ($query, $search) {
+                $query->where('judul', 'like', "%{$search}%")
+                    ->orWhere('penulis', 'like', "%{$search}%");
+            })
+            ->when($filter == 'tersedia', function ($query) {
+                $query->where('stok', '>', 0);
+            })
+            ->when($filter == 'habis', function ($query) {
+                $query->where('stok', '=', 0);
+            })
+            ->when(in_array($sort, ['judul', 'tahun_terbit', 'stok']), function ($query) use ($sort) {
+                $query->orderBy($sort, 'asc');
+            })
+            ->paginate(5)
+            ->withQueryString();
 
-        return view('home', compact('buku', 'listPenerbit'));
+        return view('home', compact('buku', 'search', 'filter', 'sort'));
     }
 
     /**
